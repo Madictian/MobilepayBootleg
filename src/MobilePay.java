@@ -21,6 +21,7 @@ public class MobilePay {
                         return conn;
     }
 
+
     public double getUserBalance(int userId){
 
                         double temp = 0;
@@ -89,10 +90,27 @@ public class MobilePay {
         }
     }
 
+    public void transcribeTransaction(double amount, int sender, int recipient){
+        Date = new Date();
+        String sql = "INSERT INTO transactions (sender, recipient, amount, date_of_transaction) VALUES (?,?,?,?)";
 
+        try(Connection conn = this.connect();
+            PreparedStatement stmt = conn.prepareStatement(sql)){
+            stmt.setInt(1, sender);
+            stmt.setInt(2,recipient);
+            stmt.setDouble(3, amount);
+            stmt.setString(4,Date.toString());
+            stmt.executeUpdate();
+
+        }catch (SQLException e){
+            System.out.println(e.getMessage());
+        }
+    }
 
     public void transaction(){
         //First a User is determined though self identification.
+
+
                         Scanner scanner = new Scanner(System.in);
                         System.out.println("type Phone number");
                         int userId = Integer.parseInt(scanner.nextLine());
@@ -134,6 +152,7 @@ public class MobilePay {
                         stmt.setInt(2,userId);
                         stmt.executeUpdate();
 
+
                 } catch (SQLException e) {
                     System.out.println(e.getMessage());
                 }
@@ -148,9 +167,13 @@ public class MobilePay {
                         stmt.setInt(2, recipientId);
                         stmt.executeUpdate();
 
+
                 } catch (SQLException e) {
                         System.out.println(e.getMessage());
                 }
+                transcribeTransaction(transferAmount,userId,recipientId);
+
+
             }
         } else if (scanner.nextLine().equals("2")){
         } else {

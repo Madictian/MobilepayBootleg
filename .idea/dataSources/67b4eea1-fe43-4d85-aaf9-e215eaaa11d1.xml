@@ -1378,11 +1378,11 @@
       <DataType>integer|0s</DataType>
       <SequenceIdentity>null</SequenceIdentity>
     </column>
-    <column id="503" parent="171" name="user1_id">
+    <column id="503" parent="171" name="sender">
       <Position>2</Position>
       <DataType>integer|0s</DataType>
     </column>
-    <column id="504" parent="171" name="user2_id">
+    <column id="504" parent="171" name="recipient">
       <Position>3</Position>
       <DataType>integer|0s</DataType>
     </column>

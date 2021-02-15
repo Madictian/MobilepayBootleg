@@ -21,6 +21,38 @@ public class MobilePay {
                         return conn;
     }
 
+    public void getAllInfo(){
+        String sqlCostumers = "SELECT * FROM Costumers";
+        String sqlTransactions = "SELECT * FROM Transactions";
+
+                    try (Connection conn = this.connect();
+                        Statement stmt  = conn.createStatement();
+                        ResultSet rs    = stmt.executeQuery(sqlCostumers)){
+                        while (rs.next()) {
+                            System.out.println( rs.getInt("id") + "\t" +
+                                                rs.getString("name") + "\t" +
+                                                rs.getString("credit_card_number") + "\t" +
+                                                rs.getString("date_created") + "\t" +
+                                                rs.getString("password") + "\t" +
+                                                rs.getInt("countryCode") + "\t" +
+                                                rs.getInt("balance") + "\t");
+                        }} catch (SQLException e){
+
+                                    System.out.println(e.getMessage());}
+
+                    try (Connection conn2 = this.connect();
+                         Statement stmt2  = conn2.createStatement();
+                         ResultSet rs2    = stmt2.executeQuery(sqlTransactions)){
+                        while (rs2.next()) {
+                            System.out.println( rs2.getInt("transactions_id") + "\t" +
+                                                rs2.getInt("sender") + "\t" +
+                                                rs2.getInt("recipient") + "\t" +
+                                                rs2.getDouble("amount") + "\t" +
+                                                rs2.getString("date_of_transaction") + "\t");
+
+                        }}catch (SQLException e2){
+                                    System.out.println(e2.getMessage()); }
+    }
 
     public double getUserBalance(int userId){
 
@@ -93,7 +125,7 @@ public class MobilePay {
 
     public void transcribeTransaction(double amount, int sender, int recipient){
         Date = new Date();
-        String sql = "INSERT INTO transactions (sender, recipient, amount, date_of_transaction)" +
+        String sql = "INSERT INTO Transactions (sender, recipient, amount, date_of_transaction)" +
                 " VALUES (?,?,?,?)";
 
         try(Connection conn = this.connect();
@@ -146,8 +178,8 @@ public class MobilePay {
                         String sqlSender = "UPDATE Costumers SET balance = ?" +
                                 " WHERE id = ?";
 
-                String sqlRecipient =   "UPDATE Costumers SET balance = ?" +
-                        " WHERE id = ?";
+                        String sqlRecipient =   "UPDATE Costumers SET balance = ?" +
+                                " WHERE id = ?";
 
                         System.out.println(sqlSender);
                         System.out.println(sqlRecipient);
@@ -217,7 +249,7 @@ public class MobilePay {
     public static void main(String[] args) {
 
         MobilePay app = new MobilePay();
-        app.transaction();
+        app.getAllInfo();
     }
 }
 

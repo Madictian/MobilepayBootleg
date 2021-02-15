@@ -70,7 +70,8 @@ public class MobilePay {
 
 
 
-        String sql = "INSERT INTO Costumers (id, name, credit_card_number, date_created, password, countryCode, balance) VALUES (?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO Costumers (id, name, credit_card_number, date_created, password, countryCode, balance)" +
+                " VALUES (?,?,?,?,?,?,?)";
 
         System.out.println(sql);
 
@@ -92,7 +93,8 @@ public class MobilePay {
 
     public void transcribeTransaction(double amount, int sender, int recipient){
         Date = new Date();
-        String sql = "INSERT INTO transactions (sender, recipient, amount, date_of_transaction) VALUES (?,?,?,?)";
+        String sql = "INSERT INTO transactions (sender, recipient, amount, date_of_transaction)" +
+                " VALUES (?,?,?,?)";
 
         try(Connection conn = this.connect();
             PreparedStatement stmt = conn.prepareStatement(sql)){
@@ -141,39 +143,69 @@ public class MobilePay {
 
 
             if (scanner.nextLine().equals("yes")) {
-                        String sql = "UPDATE Costumers SET balance = ?" +
+                        String sqlSender = "UPDATE Costumers SET balance = ?" +
                                 " WHERE id = ?";
 
-                        System.out.println(sql);
+                String sqlRecipient =   "UPDATE Costumers SET balance = ?" +
+                        " WHERE id = ?";
 
-                try (Connection conn = this.connect();
-                        PreparedStatement stmt = conn.prepareStatement(sql)) {
+                        System.out.println(sqlSender);
+                        System.out.println(sqlRecipient);
+
+                        Connection conn = null;
+                        PreparedStatement stmt = null, stmt2 = null;
+                try {
+                        conn = this.connect();
+                        if(conn == null) {
+                            return;
+                        }
+
+                        conn.setAutoCommit(false);
+
+                        stmt = conn.prepareStatement(sqlSender);
                         stmt.setDouble(1, getUserBalance(userId) - transferAmount);
                         stmt.setInt(2,userId);
-                        stmt.executeUpdate();
+
+                        int rowAffected = stmt.executeUpdate();
+
+                        if (rowAffected != 1) {
+                            conn.rollback();
+                        }
+
+                        stmt2 = conn.prepareStatement(sqlRecipient);
+                        stmt2.setDouble(1, getUserBalance(recipientId) + transferAmount);
+                        stmt2.setInt(2, recipientId);
+                        stmt2.executeUpdate();
+                        conn.commit();
 
 
-                } catch (SQLException e) {
-                    System.out.println(e.getMessage());
+
+                    } catch (SQLException e1) {
+                        try{
+                            if (conn != null){
+                                conn.rollback();
+                            }
+                        } catch ( SQLException e2){
+
+                            System.out.println(e2.getMessage());
+                        }
+                        System.out.println(e1.getMessage());
+                    }finally {
+                        try {
+                        if (stmt != null){
+                            stmt.close();
+                        }
+                        if (stmt2 != null){
+                            stmt.close();
+                        }
+                        if (conn != null){
+                            conn.close();
+                            transcribeTransaction(transferAmount,userId,recipientId);
+                        }
+                    } catch (SQLException e3) {
+                    System.out.println(e3.getMessage());
                 }
-                        sql =   "UPDATE Costumers SET balance = ?" +
-                                " WHERE id = ?";
-
-                        System.out.println(sql);
-
-                try (Connection conn = this.connect();
-                        PreparedStatement stmt = conn.prepareStatement(sql)) {
-                        stmt.setDouble(1, getUserBalance(recipientId) + transferAmount);
-                        stmt.setInt(2, recipientId);
-                        stmt.executeUpdate();
-
-
-                } catch (SQLException e) {
-                        System.out.println(e.getMessage());
-                }
-                transcribeTransaction(transferAmount,userId,recipientId);
-
-
+            }
             }
         } else if (scanner.nextLine().equals("2")){
         } else {
